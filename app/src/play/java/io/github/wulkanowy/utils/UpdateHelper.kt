@@ -17,6 +17,7 @@ import com.google.android.play.core.install.model.UpdateAvailability.DEVELOPER_T
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
 import com.google.android.play.core.ktx.isImmediateUpdateAllowed
+import com.google.android.play.core.ktx.updatePriority
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.github.wulkanowy.R
 import timber.log.Timber
@@ -30,9 +31,6 @@ class UpdateHelper @Inject constructor(@ApplicationContext private val context: 
 
     companion object {
         const val IN_APP_UPDATE_REQUEST_CODE = 1721
-
-        const val DAYS_FOR_FLEXIBLE_UPDATE = 7
-        const val HIGH_PRIORITY_UPDATE = 4
     }
 
     private val appUpdateManager by lazy { AppUpdateManagerFactory.create(context) }
@@ -46,12 +44,28 @@ class UpdateHelper @Inject constructor(@ApplicationContext private val context: 
     }
 
     private inline val AppUpdateInfo.isImmediateUpdateAvailable: Boolean
-        get() = updateAvailability() == UPDATE_AVAILABLE && isImmediateUpdateAllowed &&
-            updatePriority() >= HIGH_PRIORITY_UPDATE
+        get() {
+            val days = clientVersionStalenessDays() ?: 0
+            return updateAvailability() == UPDATE_AVAILABLE && isImmediateUpdateAllowed &&
+                when (updatePriority) {
+                    5 -> true
+                    4 -> days > 7
+                    3 -> days > 30
+                    else -> false
+                }
+        }
 
     private inline val AppUpdateInfo.isFlexibleUpdateAvailable: Boolean
-        get() = updateAvailability() == UPDATE_AVAILABLE && isFlexibleUpdateAllowed &&
-            clientVersionStalenessDays() ?: 0 >= DAYS_FOR_FLEXIBLE_UPDATE
+        get() {
+            val days = clientVersionStalenessDays() ?: 0
+            return updateAvailability() == UPDATE_AVAILABLE && isFlexibleUpdateAllowed &&
+                when (updatePriority) {
+                    4, 3, 2 -> true
+                    1 -> days >= 7
+                    0 -> false
+                    else -> false
+                }
+        }
 
     fun checkAndInstallUpdates(activity: Activity) {
         Timber.d("Checking for updates...")
