@@ -87,9 +87,10 @@ class UpdateHelper @Inject constructor(@ApplicationContext private val context: 
         )
     }
 
+    // TODO: add firebase events on update states
     fun onActivityResult(requestCode: Int, resultCode: Int) {
         if (requestCode == IN_APP_UPDATE_REQUEST_CODE && resultCode != RESULT_OK) {
-            Timber.e("Update failed! Result code: $resultCode")
+            Timber.i("Update failed! Result code: $resultCode")
             Toast.makeText(context, R.string.update_failed, Toast.LENGTH_LONG).show()
         }
     }
