@@ -25,7 +25,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class UpdateHelper @Inject constructor(@ApplicationContext private val context: Context) {
+class UpdateHelper @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val analyticsHelper: AnalyticsHelper,
+) {
 
     lateinit var messageContainer: View
 
@@ -87,11 +90,14 @@ class UpdateHelper @Inject constructor(@ApplicationContext private val context: 
         )
     }
 
-    // TODO: add firebase events on update states
     fun onActivityResult(requestCode: Int, resultCode: Int) {
-        if (requestCode == IN_APP_UPDATE_REQUEST_CODE && resultCode != RESULT_OK) {
-            Timber.i("Update failed! Result code: $resultCode")
-            Toast.makeText(context, R.string.update_failed, Toast.LENGTH_LONG).show()
+        if (requestCode == IN_APP_UPDATE_REQUEST_CODE) {
+            if (resultCode != RESULT_OK) {
+                Timber.i("Update failed! Result code: $resultCode")
+                Toast.makeText(context, R.string.update_failed, Toast.LENGTH_LONG).show()
+            }
+
+            analyticsHelper.logEvent("inapp_update", "code" to resultCode)
         }
     }
 
