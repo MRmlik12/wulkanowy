@@ -85,6 +85,7 @@ class UpdateHelper @Inject constructor(
     }
 
     private fun startUpdate(activity: Activity, appUpdateInfo: AppUpdateInfo, updateType: Int) {
+        Timber.d("Start update ($updateType): $appUpdateInfo")
         appUpdateManager.startUpdateFlowForResult(
             appUpdateInfo, updateType, activity, IN_APP_UPDATE_REQUEST_CODE
         )
@@ -115,6 +116,7 @@ class UpdateHelper @Inject constructor(
     }
 
     private fun popupSnackBarForCompleteUpdate() {
+        Timber.d("Show snackbar with update complete")
         Snackbar.make(messageContainer, R.string.update_download_success, Snackbar.LENGTH_INDEFINITE).apply {
             setAction(R.string.update_download_success_button) {
                 appUpdateManager.completeUpdate()
