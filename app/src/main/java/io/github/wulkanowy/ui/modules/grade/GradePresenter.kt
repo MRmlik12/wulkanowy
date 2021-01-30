@@ -2,8 +2,8 @@ package io.github.wulkanowy.ui.modules.grade
 
 import io.github.wulkanowy.data.Status
 import io.github.wulkanowy.data.db.entities.Semester
-import io.github.wulkanowy.data.repositories.semester.SemesterRepository
-import io.github.wulkanowy.data.repositories.student.StudentRepository
+import io.github.wulkanowy.data.repositories.SemesterRepository
+import io.github.wulkanowy.data.repositories.StudentRepository
 import io.github.wulkanowy.ui.base.BasePresenter
 import io.github.wulkanowy.ui.base.ErrorHandler
 import io.github.wulkanowy.utils.AnalyticsHelper
@@ -21,8 +21,7 @@ class GradePresenter @Inject constructor(
     private val analytics: AnalyticsHelper
 ) : BasePresenter<GradeView>(errorHandler, studentRepository) {
 
-    var selectedIndex = 0
-        private set
+    private var selectedIndex = 0
 
     private var schoolYear = 0
 
@@ -32,9 +31,8 @@ class GradePresenter @Inject constructor(
 
     private lateinit var lastError: Throwable
 
-    fun onAttachView(view: GradeView, savedIndex: Int?) {
+    override fun onAttachView(view: GradeView) {
         super.onAttachView(view)
-        selectedIndex = savedIndex ?: 0
         view.initView()
         Timber.i("Grade view was initialized with $selectedIndex index")
         errorHandler.showErrorMessage = ::showErrorViewOnError

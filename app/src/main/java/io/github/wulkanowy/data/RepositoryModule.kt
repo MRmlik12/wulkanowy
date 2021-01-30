@@ -15,7 +15,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.github.wulkanowy.data.db.AppDatabase
 import io.github.wulkanowy.data.db.SharedPrefProvider
-import io.github.wulkanowy.data.repositories.preferences.PreferencesRepository
+import io.github.wulkanowy.data.repositories.PreferencesRepository
 import io.github.wulkanowy.sdk.Sdk
 import timber.log.Timber
 import javax.inject.Singleton
@@ -33,17 +33,21 @@ internal class RepositoryModule {
             setSimpleHttpLogger { Timber.d(it) }
 
             // for debug only
-            addInterceptor(ChuckerInterceptor(
-                context = context,
-                collector = chuckerCollector,
-                alwaysReadResponseBody = true
-            ), true)
+            addInterceptor(
+                ChuckerInterceptor.Builder(context)
+                    .collector(chuckerCollector)
+                    .alwaysReadResponseBody(true)
+                    .build(), network = true
+            )
         }
     }
 
     @Singleton
     @Provides
-    fun provideChuckerCollector(@ApplicationContext context: Context, prefRepository: PreferencesRepository): ChuckerCollector {
+    fun provideChuckerCollector(
+        @ApplicationContext context: Context,
+        prefRepository: PreferencesRepository
+    ): ChuckerCollector {
         return ChuckerCollector(
             context = context,
             showNotification = prefRepository.isDebugNotificationEnable,
@@ -53,7 +57,10 @@ internal class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideDatabase(@ApplicationContext context: Context, sharedPrefProvider: SharedPrefProvider) = AppDatabase.newInstance(context, sharedPrefProvider)
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        sharedPrefProvider: SharedPrefProvider,
+    ) = AppDatabase.newInstance(context, sharedPrefProvider)
 
     @Singleton
     @Provides
@@ -65,7 +72,8 @@ internal class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+    fun provideSharedPref(@ApplicationContext context: Context): SharedPreferences =
+        PreferenceManager.getDefaultSharedPreferences(context)
 
     @Singleton
     @Provides
@@ -89,7 +97,8 @@ internal class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideGradeSemesterStatisticsDao(database: AppDatabase) = database.gradeSemesterStatisticsDao
+    fun provideGradeSemesterStatisticsDao(database: AppDatabase) =
+        database.gradeSemesterStatisticsDao
 
     @Singleton
     @Provides
@@ -162,4 +171,12 @@ internal class RepositoryModule {
     @Singleton
     @Provides
     fun provideConferenceDao(database: AppDatabase) = database.conferenceDao
+
+    @Singleton
+    @Provides
+    fun provideTimetableAdditionalDao(database: AppDatabase) = database.timetableAdditionalDao
+
+    @Singleton
+    @Provides
+    fun provideStudentInfoDao(database: AppDatabase) = database.studentInfoDao
 }

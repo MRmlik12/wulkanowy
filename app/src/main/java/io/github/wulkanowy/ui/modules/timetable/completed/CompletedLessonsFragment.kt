@@ -89,8 +89,8 @@ class CompletedLessonsFragment :
         binding.completedLessonsNavDate.text = date
     }
 
-    override fun hideRefresh() {
-        binding.completedLessonsSwipe.isRefreshing = false
+    override fun showRefresh(show: Boolean) {
+        binding.completedLessonsSwipe.isRefreshing = show
     }
 
     override fun showEmpty(show: Boolean) {
@@ -147,6 +147,7 @@ class CompletedLessonsFragment :
             setDateRangeLimiter(SchooldaysRangeLimiter())
             version = DatePickerDialog.Version.VERSION_2
             scrollOrientation = DatePickerDialog.ScrollOrientation.VERTICAL
+            vibrate(false)
             show(this@CompletedLessonsFragment.parentFragmentManager, null)
         }
     }

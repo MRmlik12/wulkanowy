@@ -1,9 +1,9 @@
 package io.github.wulkanowy.ui.modules.schoolandteachers.school
 
 import io.github.wulkanowy.data.Status
-import io.github.wulkanowy.data.repositories.school.SchoolRepository
-import io.github.wulkanowy.data.repositories.semester.SemesterRepository
-import io.github.wulkanowy.data.repositories.student.StudentRepository
+import io.github.wulkanowy.data.repositories.SchoolRepository
+import io.github.wulkanowy.data.repositories.SemesterRepository
+import io.github.wulkanowy.data.repositories.StudentRepository
 import io.github.wulkanowy.ui.base.BasePresenter
 import io.github.wulkanowy.ui.base.ErrorHandler
 import io.github.wulkanowy.utils.AnalyticsHelper
@@ -81,10 +81,7 @@ class SchoolPresenter @Inject constructor(
                         showEmpty(false)
                         showErrorView(false)
                     }
-                    analytics.logEvent(
-                        "load_item",
-                        "type" to "school"
-                    )
+                    analytics.logEvent("load_item", "type" to "school")
                 } else view?.run {
                     Timber.i("Loading school result: No school info found")
                     showContent(!isViewEmpty)

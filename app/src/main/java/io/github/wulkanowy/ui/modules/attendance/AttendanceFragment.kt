@@ -60,6 +60,7 @@ class AttendanceFragment : BaseFragment<FragmentAttendanceBinding>(R.layout.frag
     override val excuseActionMode: Boolean get() = attendanceAdapter.excuseActionMode
 
     private var actionMode: ActionMode? = null
+
     private val actionModeCallback = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             val inflater = mode.menuInflater
@@ -191,8 +192,8 @@ class AttendanceFragment : BaseFragment<FragmentAttendanceBinding>(R.layout.frag
         binding. attendanceRecycler.visibility = if (show) VISIBLE else GONE
     }
 
-    override fun hideRefresh() {
-        binding.attendanceSwipe.isRefreshing = false
+    override fun showRefresh(show: Boolean) {
+        binding.attendanceSwipe.isRefreshing = show
     }
 
     override fun showPreButton(show: Boolean) {
@@ -222,6 +223,7 @@ class AttendanceFragment : BaseFragment<FragmentAttendanceBinding>(R.layout.frag
             setDateRangeLimiter(SchooldaysRangeLimiter())
             version = DatePickerDialog.Version.VERSION_2
             scrollOrientation = DatePickerDialog.ScrollOrientation.VERTICAL
+            vibrate(false)
             show(this@AttendanceFragment.parentFragmentManager, null)
         }
     }

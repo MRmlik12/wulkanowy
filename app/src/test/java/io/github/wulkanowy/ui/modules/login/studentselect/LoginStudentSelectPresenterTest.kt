@@ -3,7 +3,7 @@ package io.github.wulkanowy.ui.modules.login.studentselect
 import io.github.wulkanowy.MainCoroutineRule
 import io.github.wulkanowy.data.db.entities.Student
 import io.github.wulkanowy.data.db.entities.StudentWithSemesters
-import io.github.wulkanowy.data.repositories.student.StudentRepository
+import io.github.wulkanowy.data.repositories.StudentRepository
 import io.github.wulkanowy.ui.modules.login.LoginErrorHandler
 import io.github.wulkanowy.utils.AnalyticsHelper
 import io.mockk.MockKAnnotations
@@ -38,7 +38,31 @@ class LoginStudentSelectPresenterTest {
 
     private lateinit var presenter: LoginStudentSelectPresenter
 
-    private val testStudent by lazy { Student(email = "test", password = "test123", scrapperBaseUrl = "https://fakelog.cf", loginType = "AUTO", symbol = "", isCurrent = false, studentId = 0, schoolName = "", schoolSymbol = "", classId = 1, studentName = "", registrationDate = now(), className = "", loginMode = "", certificateKey = "", privateKey = "", mobileBaseUrl = "", schoolShortName = "", userLoginId = 1, isParent = false, userName = "") }
+    private val testStudent by lazy {
+        Student(
+            email = "test",
+            password = "test123",
+            scrapperBaseUrl = "https://fakelog.cf",
+            loginType = "AUTO",
+            symbol = "",
+            isCurrent = false,
+            studentId = 0,
+            schoolName = "",
+            schoolSymbol = "",
+            classId = 1,
+            studentName = "",
+            registrationDate = now(),
+            className = "",
+            loginMode = "",
+            certificateKey = "",
+            privateKey = "",
+            mobileBaseUrl = "",
+            schoolShortName = "",
+            userLoginId = 1,
+            isParent = false,
+            userName = ""
+        )
+    }
 
     private val testException by lazy { RuntimeException("Problem") }
 
@@ -64,8 +88,24 @@ class LoginStudentSelectPresenterTest {
 
     @Test
     fun onSelectedStudentTest() {
-        coEvery { studentRepository.saveStudents(listOf(StudentWithSemesters(testStudent, emptyList()))) } returns listOf(1L)
-        coEvery { studentRepository.switchStudent(StudentWithSemesters(testStudent, emptyList())) } just Runs
+        coEvery {
+            studentRepository.saveStudents(
+                listOf(
+                    StudentWithSemesters(
+                        testStudent,
+                        emptyList()
+                    )
+                )
+            )
+        } returns listOf(1L)
+        coEvery {
+            studentRepository.switchStudent(
+                StudentWithSemesters(
+                    testStudent,
+                    emptyList()
+                )
+            )
+        } just Runs
         every { loginStudentSelectView.openMainView() } just Runs
         presenter.onItemSelected(StudentWithSemesters(testStudent, emptyList()), false)
         presenter.onSignIn()
@@ -77,7 +117,16 @@ class LoginStudentSelectPresenterTest {
 
     @Test
     fun onSelectedStudentErrorTest() {
-        coEvery { studentRepository.saveStudents(listOf(StudentWithSemesters(testStudent, emptyList()))) } throws testException
+        coEvery {
+            studentRepository.saveStudents(
+                listOf(
+                    StudentWithSemesters(
+                        testStudent,
+                        emptyList()
+                    )
+                )
+            )
+        } throws testException
         coEvery { studentRepository.logoutStudent(testStudent) } just Runs
         presenter.onItemSelected(StudentWithSemesters(testStudent, emptyList()), false)
         presenter.onSignIn()
