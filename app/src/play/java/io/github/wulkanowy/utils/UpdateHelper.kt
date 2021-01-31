@@ -32,15 +32,12 @@ class UpdateHelper @Inject constructor(
 
     lateinit var messageContainer: View
 
-    companion object {
-        const val IN_APP_UPDATE_REQUEST_CODE = 1721
-    }
-
     private val appUpdateManager by lazy { AppUpdateManagerFactory.create(context) }
 
     private val flexibleUpdateListener = InstallStateUpdatedListener { state ->
         when (state.installStatus()) {
-            PENDING -> Toast.makeText(context, R.string.update_download_started, Toast.LENGTH_SHORT).show()
+            PENDING -> Toast.makeText(context, R.string.update_download_started, Toast.LENGTH_SHORT)
+                .show()
             DOWNLOADED -> popupSnackBarForCompleteUpdate()
             else -> Timber.d("Update state: ${state.installStatus()}")
         }
@@ -49,32 +46,36 @@ class UpdateHelper @Inject constructor(
     private inline val AppUpdateInfo.isImmediateUpdateAvailable: Boolean
         get() {
             val days = clientVersionStalenessDays() ?: 0
-            return updateAvailability() == UPDATE_AVAILABLE && isImmediateUpdateAllowed &&
-                when (updatePriority) {
-                    5 -> true
-                    4 -> days > 7
-                    3 -> days > 30
-                    else -> false
-                }
+            val isUpdatePriorityAllowUpdate = when (updatePriority) {
+                5 -> true
+                4 -> days > 7
+                3 -> days > 30
+                else -> false
+            }
+
+            return updateAvailability() == UPDATE_AVAILABLE && isImmediateUpdateAllowed && isUpdatePriorityAllowUpdate
         }
 
     private inline val AppUpdateInfo.isFlexibleUpdateAvailable: Boolean
         get() {
             val days = clientVersionStalenessDays() ?: 0
-            return updateAvailability() == UPDATE_AVAILABLE && isFlexibleUpdateAllowed &&
-                when (updatePriority) {
-                    4, 3, 2 -> true
-                    1 -> days >= 7
-                    0 -> false
-                    else -> false
-                }
+            val isUpdatePriorityAllowUpdate = when (updatePriority) {
+                4, 3, 2 -> true
+                1 -> days >= 7
+                0 -> false
+                else -> false
+            }
+
+            return updateAvailability() == UPDATE_AVAILABLE && isFlexibleUpdateAllowed && isUpdatePriorityAllowUpdate
         }
 
     fun checkAndInstallUpdates(activity: Activity) {
         Timber.d("Checking for updates...")
         appUpdateManager.appUpdateInfo.addOnSuccessListener { appUpdateInfo ->
             when {
-                appUpdateInfo.isImmediateUpdateAvailable -> startUpdate(activity, appUpdateInfo, IMMEDIATE)
+                appUpdateInfo.isImmediateUpdateAvailable -> {
+                    startUpdate(activity, appUpdateInfo, IMMEDIATE)
+                }
                 appUpdateInfo.isFlexibleUpdateAvailable -> {
                     appUpdateManager.registerListener(flexibleUpdateListener)
                     startUpdate(activity, appUpdateInfo, FLEXIBLE)
@@ -109,7 +110,11 @@ class UpdateHelper @Inject constructor(
             when {
                 DOWNLOADED == info.installStatus() -> popupSnackBarForCompleteUpdate()
                 DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS == info.updateAvailability() -> {
-                    startUpdate(activity, info, if (info.isImmediateUpdateAvailable) IMMEDIATE else FLEXIBLE)
+                    startUpdate(
+                        activity = activity,
+                        appUpdateInfo = info,
+                        updateType = if (info.isImmediateUpdateAvailable) IMMEDIATE else FLEXIBLE
+                    )
                 }
             }
         }
@@ -117,12 +122,21 @@ class UpdateHelper @Inject constructor(
 
     private fun popupSnackBarForCompleteUpdate() {
         Timber.d("Show snackbar with update complete")
-        Snackbar.make(messageContainer, R.string.update_download_success, Snackbar.LENGTH_INDEFINITE).apply {
+        Snackbar.make(
+            messageContainer,
+            R.string.update_download_success,
+            Snackbar.LENGTH_INDEFINITE
+        ).apply {
             setAction(R.string.update_download_success_button) {
                 appUpdateManager.completeUpdate()
                 appUpdateManager.unregisterListener(flexibleUpdateListener)
             }
             show()
         }
+    }
+
+    private companion object {
+
+        private const val IN_APP_UPDATE_REQUEST_CODE = 1721
     }
 }
