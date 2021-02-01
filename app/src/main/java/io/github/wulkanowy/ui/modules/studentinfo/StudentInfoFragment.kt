@@ -105,6 +105,7 @@ class StudentInfoFragment :
     }
 
     override fun showPersonalTypeData(studentInfo: StudentInfo) {
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.account_personal_data)
         updateData(
             listOf(
                 getString(R.string.student_info_first_name) to studentInfo.firstName,
@@ -120,6 +121,7 @@ class StudentInfoFragment :
     }
 
     override fun showContactTypeData(studentInfo: StudentInfo) {
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.account_contact)
         updateData(
             listOf(
                 getString(R.string.student_info_phone) to studentInfo.phoneNumber,
@@ -133,6 +135,7 @@ class StudentInfoFragment :
 
     @SuppressLint("DefaultLocale")
     override fun showFamilyTypeData(studentInfo: StudentInfo) {
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.account_family)
         updateData(
             listOf(
                 studentInfo.firstGuardian.kinship.capitalize() to studentInfo.firstGuardian.fullName,
@@ -144,6 +147,7 @@ class StudentInfoFragment :
     }
 
     override fun showAddressTypeData(studentInfo: StudentInfo) {
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.account_address)
         updateData(
             listOf(
                 getString(R.string.student_info_address) to studentInfo.address,
@@ -156,6 +160,7 @@ class StudentInfoFragment :
     }
 
     override fun showFirstGuardianTypeData(studentInfo: StudentInfo) {
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.student_info_guardian_address)
         updateData(
             listOf(
                 getString(R.string.student_info_full_name) to studentInfo.firstGuardian.fullName,
@@ -170,6 +175,7 @@ class StudentInfoFragment :
     }
 
     override fun showSecondGuardianTypeData(studentInfo: StudentInfo) {
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.student_info_guardian_address)
         updateData(
             listOf(
                 getString(R.string.student_info_full_name) to studentInfo.secondGuardian.fullName,
