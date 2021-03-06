@@ -21,9 +21,9 @@ class LuckyNumberHistoryAdapter @Inject constructor() :
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = items[position]
         with(holder.binding) {
-            luckyNumberWeekName.text = item.date.weekDayName
-            luckyNumberDate.text = item.date.toFormattedString("dd.MM")
-            luckyNumber.text = item.luckyNumber.toString()
+            luckyNumberHistoryWeekName.text = item.date.weekDayName
+            luckyNumberHistoryDate.text = item.date.toFormattedString("dd.MM")
+            luckyNumberHistory.text = item.luckyNumber.toString()
         }
     }
 

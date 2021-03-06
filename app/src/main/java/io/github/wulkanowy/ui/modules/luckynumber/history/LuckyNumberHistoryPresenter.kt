@@ -38,7 +38,7 @@ class LuckyNumberHistoryPresenter @Inject constructor(
             showContent(false)
             enableSwipe(false)
         }
-        Timber.i("Lucky number view was initialized")
+        Timber.i("Lucky number history view was initialized")
         errorHandler.showErrorMessage = ::showErrorViewOnError
         loadData()
     }
@@ -49,7 +49,7 @@ class LuckyNumberHistoryPresenter @Inject constructor(
             luckyNumberRepository.getLuckyNumberHistory(student, currentDate.monday, currentDate.sunday)
         }.onEach {
             when (it.status) {
-                Status.LOADING -> Timber.i("Loading lucky number started")
+                Status.LOADING -> Timber.i("Loading lucky number history started")
                 Status.SUCCESS -> {
                     if (!it.data?.first().isNullOrEmpty()) {
                         Timber.i("Loading lucky number result: Success")
@@ -62,11 +62,11 @@ class LuckyNumberHistoryPresenter @Inject constructor(
                         }
                         analytics.logEvent(
                             "load_items",
-                            "type" to "lucky_number",
-                            "number" to it.data
+                            "type" to "lucky_number_history",
+                            "numbers" to it.data
                         )
                     } else {
-                        Timber.i("Loading lucky number result: No lucky number found")
+                        Timber.i("Loading lucky number history result: No lucky numbers found")
                         view?.run {
                             showContent(false)
                             showEmpty(true)
@@ -75,7 +75,7 @@ class LuckyNumberHistoryPresenter @Inject constructor(
                     }
                 }
                 Status.ERROR -> {
-                    Timber.i("Loading lucky number result: An exception occurred")
+                    Timber.i("Loading lucky number history result: An exception occurred")
                     errorHandler.dispatch(it.error!!)
                 }
             }
@@ -101,7 +101,7 @@ class LuckyNumberHistoryPresenter @Inject constructor(
 
     private fun reloadView(date: LocalDate) {
         currentDate = date
-        Timber.i("Reload lucky number view with the date ${currentDate.toFormattedString()}")
+        Timber.i("Reload lucky number history view with the date ${currentDate.toFormattedString()}")
         view?.apply {
             showProgress(true)
             enableSwipe(false)
@@ -114,7 +114,7 @@ class LuckyNumberHistoryPresenter @Inject constructor(
     }
 
     fun onSwipeRefresh() {
-        Timber.i("Force refreshing the lucky number")
+        Timber.i("Force refreshing the lucky number history")
         loadData()
     }
 

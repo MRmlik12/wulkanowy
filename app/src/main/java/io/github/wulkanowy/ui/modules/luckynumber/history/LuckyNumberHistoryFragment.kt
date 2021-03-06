@@ -42,29 +42,29 @@ class LuckyNumberHistoryFragment :
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentLuckyNumberHistoryBinding.bind(view)
-        messageContainer = binding.luckyNumberRecycler
+        messageContainer = binding.luckyNumberHistoryRecycler
         presenter.onAttachView(this)
     }
 
     override fun initView() {
-        with(binding.luckyNumberRecycler) {
+        with(binding.luckyNumberHistoryRecycler) {
             layoutManager = LinearLayoutManager(context)
             adapter = luckyNumberHistoryAdapter
             addItemDecoration(DividerItemDecoration(context))
         }
 
         with(binding) {
-            luckyNumberSwipe.setOnRefreshListener(presenter::onSwipeRefresh)
-            luckyNumberSwipe.setColorSchemeColors(requireContext().getThemeAttrColor(R.attr.colorPrimary))
-            luckyNumberSwipe.setProgressBackgroundColorSchemeColor(requireContext().getThemeAttrColor(R.attr.colorSwipeRefresh))
-            luckyNumberNavDate.setOnClickListener { presenter.onPickDate() }
-            luckyNumberErrorRetry.setOnClickListener { presenter.onRetry() }
-            luckyNumberErrorDetails.setOnClickListener { presenter.onDetailsClick() }
+            luckyNumberHistorySwipe.setOnRefreshListener(presenter::onSwipeRefresh)
+            luckyNumberHistorySwipe.setColorSchemeColors(requireContext().getThemeAttrColor(R.attr.colorPrimary))
+            luckyNumberHistorySwipe.setProgressBackgroundColorSchemeColor(requireContext().getThemeAttrColor(R.attr.colorSwipeRefresh))
+            luckyNumberHistoryNavDate.setOnClickListener { presenter.onPickDate() }
+            luckyNumberHistoryErrorRetry.setOnClickListener { presenter.onRetry() }
+            luckyNumberHistoryErrorDetails.setOnClickListener { presenter.onDetailsClick() }
 
-            luckyNumberPreviousButton.setOnClickListener { presenter.onPreviousWeek() }
-            luckyNumberNextButton.setOnClickListener { presenter.onNextWeek() }
+            luckyNumberHistoryPreviousButton.setOnClickListener { presenter.onPreviousWeek() }
+            luckyNumberHistoryNextButton.setOnClickListener { presenter.onNextWeek() }
 
-            luckyNumberNavContainer.setElevationCompat(requireContext().dpToPx(8f))
+            luckyNumberHistoryNavContainer.setElevationCompat(requireContext().dpToPx(8f))
         }
     }
 
@@ -83,39 +83,39 @@ class LuckyNumberHistoryFragment :
     }
 
     override fun hideRefresh() {
-        binding.luckyNumberSwipe.isRefreshing = false
+        binding.luckyNumberHistorySwipe.isRefreshing = false
     }
 
     override fun showEmpty(show: Boolean) {
-        binding.luckyNumberEmpty.visibility = if (show) VISIBLE else GONE
+        binding.luckyNumberHistoryEmpty.visibility = if (show) VISIBLE else GONE
     }
 
     override fun showErrorView(show: Boolean) {
-        binding.luckyNumberError.visibility = if (show) VISIBLE else GONE
+        binding.luckyNumberHistoryError.visibility = if (show) VISIBLE else GONE
     }
 
     override fun setErrorDetails(message: String) {
-        binding.luckyNumberErrorMessage.text = message
+        binding.luckyNumberHistoryErrorMessage.text = message
     }
 
     override fun updateNavigationWeek(date: String) {
-        binding.luckyNumberNavDate.text = date
+        binding.luckyNumberHistoryNavDate.text = date
     }
 
     override fun showProgress(show: Boolean) {
-        binding.luckyNumberProgress.visibility = if (show) VISIBLE else GONE
+        binding.luckyNumberHistoryProgress.visibility = if (show) VISIBLE else GONE
     }
 
     override fun enableSwipe(enable: Boolean) {
-        binding.luckyNumberSwipe.isEnabled = enable
+        binding.luckyNumberHistorySwipe.isEnabled = enable
     }
 
     override fun showPreButton(show: Boolean) {
-        binding.luckyNumberPreviousButton.visibility = if (show) VISIBLE else View.INVISIBLE
+        binding.luckyNumberHistoryPreviousButton.visibility = if (show) VISIBLE else View.INVISIBLE
     }
 
     override fun showNextButton(show: Boolean) {
-        binding.luckyNumberNextButton.visibility = if (show) VISIBLE else View.INVISIBLE
+        binding.luckyNumberHistoryNextButton.visibility = if (show) VISIBLE else View.INVISIBLE
     }
 
     override fun showDatePickerDialog(currentDate: LocalDate) {
@@ -135,7 +135,7 @@ class LuckyNumberHistoryFragment :
     }
 
     override fun showContent(show: Boolean) {
-        binding.luckyNumberRecycler.visibility = if (show) VISIBLE else GONE
+        binding.luckyNumberHistoryRecycler.visibility = if (show) VISIBLE else GONE
     }
 
     override fun onDestroyView() {
