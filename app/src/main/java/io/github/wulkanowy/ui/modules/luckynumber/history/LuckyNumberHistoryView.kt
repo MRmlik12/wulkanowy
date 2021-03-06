@@ -1,15 +1,18 @@
-package io.github.wulkanowy.ui.modules.luckynumber
+package io.github.wulkanowy.ui.modules.luckynumber.history
 
 import io.github.wulkanowy.data.db.entities.LuckyNumber
 import io.github.wulkanowy.ui.base.BaseView
+import java.time.LocalDate
 
-interface LuckyNumberView : BaseView {
+interface LuckyNumberHistoryView : BaseView {
 
     val isViewEmpty: Boolean
 
     fun initView()
 
-    fun updateData(data: LuckyNumber)
+    fun updateData(data: List<LuckyNumber>)
+
+    fun clearData()
 
     fun hideRefresh()
 
@@ -19,11 +22,19 @@ interface LuckyNumberView : BaseView {
 
     fun setErrorDetails(message: String)
 
+    fun updateNavigationWeek(date: String)
+
     fun showProgress(show: Boolean)
 
     fun enableSwipe(enable: Boolean)
 
+    fun showPreButton(show: Boolean)
+
+    fun showNextButton(show: Boolean)
+
+    fun showDatePickerDialog(currentDate: LocalDate)
+
     fun showContent(show: Boolean)
 
-    fun openLuckyNumberHistory()
+    fun onDestroyView()
 }

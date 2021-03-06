@@ -18,27 +18,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
-            android:id="@+id/luckyNumberContent"
-            android:layout_width="match_parent"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/luckyNumberRecycler"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical">
+            tools:listitem="@layout/item_lucky_number_history"/>
 
-            <TextView
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/lucky_number_header"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/luckyNumberText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="52sp"
-                tools:text="14" />
-        </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <LinearLayout
@@ -65,26 +50,6 @@
             android:gravity="center"
             android:text="@string/lucky_number_empty"
             android:textSize="20sp" />
-    </LinearLayout>
-
-
-    <LinearLayout
-        android:id="@+id/luckyNumberHistory"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible"
-        android:gravity="bottom"
-        android:orientation="vertical">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/luckyNumberHistoryButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="15dp"
-            android:text="@string/lucky_number_history_button" />
-
     </LinearLayout>
 
     <LinearLayout
@@ -137,4 +102,54 @@
                 android:text="@string/all_retry" />
         </LinearLayout>
     </LinearLayout>
+
+    <io.github.wulkanowy.ui.widgets.MaterialLinearLayout
+        android:id="@+id/luckyNumberNavContainer"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"
+        android:gravity="center"
+        android:orientation="horizontal"
+        tools:ignore="UnusedAttribute">
+
+        <ImageButton
+            android:id="@+id/luckyNumberPreviousButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/all_prev"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:scaleType="fitStart"
+            android:tint="?colorPrimary"
+            app:srcCompat="@drawable/ic_chevron_left" />
+
+        <TextView
+            android:id="@+id/luckyNumberNavDate"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:background="?selectableItemBackgroundBorderless"
+            android:fontFamily="sans-serif"
+            android:gravity="center"
+            android:textSize="16sp"
+            tools:text="@tools:sample/date/ddmmyy" />
+
+        <ImageButton
+            android:id="@+id/luckyNumberNextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/all_next"
+            android:paddingLeft="12dp"
+            android:paddingTop="8dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="8dp"
+            android:scaleType="fitEnd"
+            android:tint="?colorPrimary"
+            app:srcCompat="@drawable/ic_chevron_right" />
+    </io.github.wulkanowy.ui.widgets.MaterialLinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
