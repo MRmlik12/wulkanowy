@@ -1,5 +1,7 @@
 package io.github.wulkanowy.ui.modules.message.send
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import io.github.wulkanowy.data.Status
 import io.github.wulkanowy.data.db.entities.Message
 import io.github.wulkanowy.data.db.entities.Recipient
@@ -36,6 +38,9 @@ class SendMessagePresenter @Inject constructor(
         Timber.i("Send message view was initialized")
         loadData(message, reply)
         with(view) {
+            if (view.getDraftState()) {
+                view.showMessageBackupDialog()
+            }
             message?.let {
                 setSubject(when (reply) {
                     true -> "RE: "
@@ -159,6 +164,7 @@ class SendMessagePresenter @Inject constructor(
                 }
                 Status.SUCCESS -> {
                     Timber.i("Sending message result: Success")
+                    view?.clearDraft()
                     view?.run {
                         showMessage(messageSuccess)
                         popView()
@@ -202,5 +208,19 @@ class SendMessagePresenter @Inject constructor(
                 recipient = it
             )
         }
+    }
+
+     fun serializeRecipients(recipientsData: List<RecipientChipItem>): String {
+        val type = Types.newParameterizedType(List::class.java, RecipientChipItem::class.java)
+        val moshi = Moshi.Builder().build()
+        val adapter = moshi.adapter<List<RecipientChipItem>>(type)
+        return adapter.toJson(recipientsData)
+    }
+
+    fun getRecipientsGroup(json: String): List<RecipientChipItem> {
+        val type = Types.newParameterizedType(List::class.java, RecipientChipItem::class.java)
+        val moshi = Moshi.Builder().build()
+        val adapter = moshi.adapter<List<RecipientChipItem>>(type)
+        return adapter.fromJson(json)!!
     }
 }
