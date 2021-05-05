@@ -3,7 +3,6 @@ package io.github.wulkanowy.ui.modules.message.send
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Rect
 import android.os.Bundle
 import android.view.Menu
@@ -19,6 +18,7 @@ import io.github.wulkanowy.R
 import io.github.wulkanowy.data.db.entities.Message
 import io.github.wulkanowy.data.db.entities.ReportingUnit
 import io.github.wulkanowy.databinding.ActivitySendMessageBinding
+import io.github.wulkanowy.materialchipsinput.ChipItem
 import io.github.wulkanowy.ui.base.BaseActivity
 import io.github.wulkanowy.utils.dpToPx
 import io.github.wulkanowy.utils.hideSoftInput
@@ -65,10 +65,6 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
     override val messageSuccess: String
         get() = getString(R.string.message_send_successful)
 
-    private lateinit var preferences: SharedPreferences
-
-    private lateinit var preferencesEditor: SharedPreferences.Editor
-
     @SuppressLint("CommitPrefEdits")
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,9 +77,6 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
         formSubjectValue = binding.sendMessageSubject.text.toString()
         formContentValue = binding.sendMessageMessageContent.text.toString()
 
-        preferences = getSharedPreferences("sendMessage", MODE_PRIVATE)
-        preferencesEditor = preferences.edit()
-
         presenter.onAttachView(this, intent.getSerializableExtra(EXTRA_MESSAGE) as? Message, intent.getSerializableExtra(EXTRA_REPLY) as? Boolean)
     }
 
@@ -92,7 +85,7 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
         setUpExtendedHitArea()
         with(binding) {
             sendMessageScroll.setOnTouchListener { _, _ -> presenter.onTouchScroll() }
-            sendMessageTo.onChipAddListener = { onRecipientChange() }
+            sendMessageTo.onChipAddListener = { onRecipientChange(it) }
             sendMessageTo.onTextChangeListener = presenter::onRecipientsTextChange
             sendMessageSubject.doOnTextChanged { text, _, _, _ -> onMessageSubjectChange(text) }
             sendMessageMessageContent.doOnTextChanged { text, _, _, _ -> onMessageContentChange(text) }
@@ -101,43 +94,17 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
 
     private fun onMessageSubjectChange(text: CharSequence?) {
         formSubjectValue = text.toString()
-        preferencesEditor.apply {
-            changeDraftState()
-            putString(resources.getString(R.string.message_send_subject), text.toString())
-            apply()
-        }
+        presenter
+        presenter.saveSubjectToPreference(text.toString())
     }
 
     private fun onMessageContentChange(text: CharSequence?) {
         formContentValue = text.toString()
-        preferencesEditor.apply {
-            changeDraftState()
-            putString(resources.getString(R.string.message_send_content), text.toString())
-            apply()
-        }
+        presenter.saveContentToPreference(text.toString())
     }
 
-    private fun onRecipientChange() {
-        preferencesEditor.apply {
-            changeDraftState()
-            putString(resources.getString(R.string.message_send_recipients), presenter.serializeRecipients(formRecipientsData))
-            apply()
-        }
-    }
-
-    private fun changeDraftState() {
-        if (formSubjectValue.isEmpty() && formContentValue.isEmpty() && formRecipientsData.isEmpty()) {
-            preferencesEditor.apply {
-                putBoolean(resources.getString(R.string.isDraft), false)
-                apply()
-            }
-            return
-        }
-
-        preferencesEditor.apply {
-            putBoolean(resources.getString(R.string.isDraft), true)
-            apply()
-        }
+    private fun onRecipientChange(recipient: ChipItem) {
+        presenter.saveRecipientsToPreference(formRecipientsData)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -238,29 +205,12 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
         }
     }
 
-    override fun getDraftState(): Boolean {
-        return preferences.getBoolean(resources.getString(R.string.isDraft), false)
-    }
-
-    override fun getRecipientsNames(): String {
-        formRecipientsData = presenter.getRecipientsGroup(preferences.getString(resources.getString(R.string.message_send_recipients), "")!!)
-        return formRecipientsData.joinToString { it.recipient.name }
-    }
-
-    override fun recoverDraft() {
-        preferences.apply {
-            setSelectedRecipients(formRecipientsData)
-            setSubject(getString(resources.getString(R.string.message_send_subject), "")!!)
-            setContent(getString(resources.getString(R.string.message_send_content), "")!!)
-        }
-    }
-
     override fun showMessageBackupDialog() {
         SendMessageDialog().show(supportFragmentManager, "backupMessage")
     }
 
     override fun clearDraft() {
         formRecipientsData = binding.sendMessageTo.addedChipItems as List<RecipientChipItem>
-        preferencesEditor.clear()
+        presenter.clearDraft()
     }
 }

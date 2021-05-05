@@ -38,7 +38,7 @@ class SendMessagePresenter @Inject constructor(
         Timber.i("Send message view was initialized")
         loadData(message, reply)
         with(view) {
-            if (view.getDraftState()) {
+            if (messageRepository.getDraftState()) {
                 view.showMessageBackupDialog()
             }
             message?.let {
@@ -210,17 +210,56 @@ class SendMessagePresenter @Inject constructor(
         }
     }
 
-     fun serializeRecipients(recipientsData: List<RecipientChipItem>): String {
+     private fun serializeRecipients(recipientsData: List<RecipientChipItem>): String {
         val type = Types.newParameterizedType(List::class.java, RecipientChipItem::class.java)
         val moshi = Moshi.Builder().build()
         val adapter = moshi.adapter<List<RecipientChipItem>>(type)
         return adapter.toJson(recipientsData)
     }
 
-    fun getRecipientsGroup(json: String): List<RecipientChipItem> {
+    private fun deserializeRecipients(json: String): List<RecipientChipItem> {
         val type = Types.newParameterizedType(List::class.java, RecipientChipItem::class.java)
         val moshi = Moshi.Builder().build()
         val adapter = moshi.adapter<List<RecipientChipItem>>(type)
         return adapter.fromJson(json)!!
+    }
+
+    private fun checkState() {
+        messageRepository.changeDraftState(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formSubjectValue!!)
+    }
+
+    fun saveRecipientsToPreference(recipients: List<RecipientChipItem>) {
+        checkState()
+        val json = serializeRecipients(recipients)
+        messageRepository.setMessageRecipients(json)
+    }
+
+    private fun getRecipientsFromPreference(): List<RecipientChipItem> {
+        val json = messageRepository.getMessageRecipients()
+        return deserializeRecipients(json)
+    }
+
+    fun saveSubjectToPreference(subject: String) {
+        checkState()
+        messageRepository.setMessageSubject(subject)
+    }
+
+    fun saveContentToPreference(content: String) {
+        checkState()
+        messageRepository.setMessageContent(content)
+    }
+
+    fun restoreMessageParts() {
+        view?.setSubject(messageRepository.getMessageSubject())
+        view?.setContent(messageRepository.getMessageContent())
+        view?.setSelectedRecipients(getRecipientsFromPreference())
+    }
+
+    fun getRecipientsNames(): String {
+        return getRecipientsFromPreference().joinToString { it.recipient.name }
+    }
+
+    fun clearDraft() {
+        messageRepository.clearMessagePreferences()
     }
 }

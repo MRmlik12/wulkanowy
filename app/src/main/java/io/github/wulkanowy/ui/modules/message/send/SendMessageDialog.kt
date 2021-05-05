@@ -13,13 +13,13 @@ class SendMessageDialog : DialogFragment() {
         return activity.let {
             val builder = AlertDialog.Builder(it)
                 .setTitle(R.string.message_title)
-                .setMessage(resources.getString(R.string.message_restore_dialog, (activity as SendMessageActivity).getRecipientsNames()))
-                .setPositiveButton("Yes") { _, _ ->
-                    (activity as SendMessageActivity).recoverDraft()
+                .setMessage(resources.getString(R.string.message_restore_dialog, (activity as SendMessageActivity).presenter.getRecipientsNames()))
+                .setPositiveButton(R.string.all_yes) { _, _ ->
+                    (activity as SendMessageActivity).presenter.restoreMessageParts()
                     Timber.i("Continue work on draft")
                 }
-                .setNegativeButton("No") { _, _ ->
-                    (activity as SendMessageActivity).clearDraft()
+                .setNegativeButton(R.string.all_no) { _, _ ->
+                    (activity as SendMessageActivity).presenter.clearDraft()
                     Timber.i("Draft cleared!")
                 }
             builder.create()

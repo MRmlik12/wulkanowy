@@ -1,5 +1,9 @@
 package io.github.wulkanowy.data.repositories
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.wulkanowy.R
+import io.github.wulkanowy.data.db.SharedPrefProvider
 import io.github.wulkanowy.data.db.dao.MessageAttachmentDao
 import io.github.wulkanowy.data.db.dao.MessagesDao
 import io.github.wulkanowy.data.db.entities.Message
@@ -13,6 +17,7 @@ import io.github.wulkanowy.data.mappers.mapToEntities
 import io.github.wulkanowy.sdk.Sdk
 import io.github.wulkanowy.sdk.pojo.Folder
 import io.github.wulkanowy.sdk.pojo.SentMessage
+import io.github.wulkanowy.ui.modules.message.send.RecipientChipItem
 import io.github.wulkanowy.utils.AutoRefreshHelper
 import io.github.wulkanowy.utils.getRefreshKey
 import io.github.wulkanowy.utils.init
@@ -31,7 +36,9 @@ class MessageRepository @Inject constructor(
     private val messagesDb: MessagesDao,
     private val messageAttachmentDao: MessageAttachmentDao,
     private val sdk: Sdk,
+    @ApplicationContext private val context: Context,
     private val refreshHelper: AutoRefreshHelper,
+    private val sharedPrefProvider: SharedPrefProvider
 ) {
 
     private val saveFetchResultMutex = Mutex()
@@ -102,5 +109,42 @@ class MessageRepository @Inject constructor(
                 content = message.content
             }))
         } else messagesDb.deleteAll(listOf(message))
+    }
+
+    fun getDraftState(): Boolean {
+        return sharedPrefProvider.getBoolean(context.getString(R.string.pref_key_message_send_is_draft), false)
+    }
+
+    fun changeDraftState(recipients: List<RecipientChipItem>, subject: String, content: String) {
+        if (recipients.isEmpty() && subject.isEmpty() && content.isEmpty()) {
+            sharedPrefProvider.putBoolean(context.getString(R.string.pref_key_message_send_is_draft), false)
+            return
+        }
+
+        sharedPrefProvider.putBoolean(context.getString(R.string.pref_key_message_send_is_draft), true)
+    }
+
+    fun setMessageSubject(text: CharSequence?) {
+        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_subject), text.toString())
+    }
+
+    fun getMessageSubject() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_subject), "")
+
+    fun setMessageContent(text: CharSequence?) {
+        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_content), text.toString())
+    }
+
+    fun getMessageContent() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_content), "")
+
+    fun setMessageRecipients(recipients: String) {
+        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_recipients), recipients)
+    }
+
+    fun getMessageRecipients() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_recipients), "")
+
+    fun clearMessagePreferences() {
+        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_recipients))
+        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_subject))
+        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_content))
     }
 }

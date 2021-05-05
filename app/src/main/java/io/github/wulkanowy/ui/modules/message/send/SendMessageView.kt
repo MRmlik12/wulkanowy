@@ -46,13 +46,7 @@ interface SendMessageView : BaseView {
 
     fun popView()
 
-    fun getDraftState(): Boolean
-
-    fun getRecipientsNames(): String
-
     fun showMessageBackupDialog()
-
-    fun recoverDraft()
 
     fun clearDraft()
 }
