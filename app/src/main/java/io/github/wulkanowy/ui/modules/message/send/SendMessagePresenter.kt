@@ -38,7 +38,7 @@ class SendMessagePresenter @Inject constructor(
         Timber.i("Send message view was initialized")
         loadData(message, reply)
         with(view) {
-            if (messageRepository.getDraftState()) {
+            if (messageRepository.getDraftState() && reply == null) {
                 view.showMessageBackupDialog()
             }
             message?.let {

@@ -85,7 +85,7 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
         setUpExtendedHitArea()
         with(binding) {
             sendMessageScroll.setOnTouchListener { _, _ -> presenter.onTouchScroll() }
-            sendMessageTo.onChipAddListener = { onRecipientChange(it) }
+            sendMessageTo.onChipAddListener = { onRecipientChange() }
             sendMessageTo.onTextChangeListener = presenter::onRecipientsTextChange
             sendMessageSubject.doOnTextChanged { text, _, _, _ -> onMessageSubjectChange(text) }
             sendMessageMessageContent.doOnTextChanged { text, _, _, _ -> onMessageContentChange(text) }
@@ -103,7 +103,7 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
         presenter.saveContentToPreference(text.toString())
     }
 
-    private fun onRecipientChange(recipient: ChipItem) {
+    private fun onRecipientChange() {
         presenter.saveRecipientsToPreference(formRecipientsData)
     }
 
