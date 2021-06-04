@@ -1,6 +1,7 @@
 package io.github.wulkanowy.data.repositories
 
 import android.content.Context
+import com.squareup.moshi.Moshi
 import io.github.wulkanowy.data.Status
 import io.github.wulkanowy.data.db.SharedPrefProvider
 import io.github.wulkanowy.data.db.dao.MessageAttachmentDao
@@ -53,12 +54,15 @@ class MessageRepositoryTest {
 
     private lateinit var messageRepository: MessageRepository
 
+    @MockK
+    private lateinit var moshi: Moshi
+
     @Before
     fun setUp() {
         MockKAnnotations.init(this)
         every { refreshHelper.isShouldBeRefreshed(any()) } returns false
 
-        messageRepository = MessageRepository(messageDb, messageAttachmentDao, sdk, context, refreshHelper, sharedPrefProvider)
+        messageRepository = MessageRepository(messageDb, messageAttachmentDao, sdk, context, refreshHelper, sharedPrefProvider, moshi)
     }
 
     @Test(expected = NoSuchElementException::class)
