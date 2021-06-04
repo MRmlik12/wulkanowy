@@ -1,10 +1,10 @@
 package io.github.wulkanowy.ui.modules.message.send
 
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import io.github.wulkanowy.data.Status
 import io.github.wulkanowy.data.db.entities.Message
 import io.github.wulkanowy.data.db.entities.Recipient
+import io.github.wulkanowy.data.pojos.MessageDraft
 import io.github.wulkanowy.data.repositories.MessageRepository
 import io.github.wulkanowy.data.repositories.PreferencesRepository
 import io.github.wulkanowy.data.repositories.RecipientRepository
@@ -17,7 +17,14 @@ import io.github.wulkanowy.utils.AnalyticsHelper
 import io.github.wulkanowy.utils.afterLoading
 import io.github.wulkanowy.utils.flowWithResource
 import io.github.wulkanowy.utils.toFormattedString
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -32,9 +39,17 @@ class SendMessagePresenter @Inject constructor(
     private val analytics: AnalyticsHelper
 ) : BasePresenter<SendMessageView>(errorHandler, studentRepository) {
 
+    private val recipientsChannel= Channel<String>()
+    private val contentChannel = Channel<String>()
+    private val subjectChannel = Channel<String>()
+
+    @FlowPreview
     fun onAttachView(view: SendMessageView, message: Message?, reply: Boolean?) {
         super.onAttachView(view)
         view.initView()
+        initializeRecipientsStream()
+        initializeContentStream()
+        initializeSubjectStream()
         Timber.i("Send message view was initialized")
         loadData(message, reply)
         with(view) {
@@ -210,53 +225,75 @@ class SendMessagePresenter @Inject constructor(
         }
     }
 
-     private fun serializeRecipients(recipientsData: List<RecipientChipItem>): String {
-        val type = Types.newParameterizedType(List::class.java, RecipientChipItem::class.java)
-        val moshi = Moshi.Builder().build()
-        val adapter = moshi.adapter<List<RecipientChipItem>>(type)
-        return adapter.toJson(recipientsData)
+    @FlowPreview
+    private fun initializeRecipientsStream() {
+        launch {
+            recipientsChannel.consumeAsFlow()
+                .debounce(250)
+                .catch { Timber.e(it) }
+                .collect {
+                    saveDraftMessage()
+                    Timber.i("Draft message was saved!")
+                }
+        }
     }
 
-    private fun deserializeRecipients(json: String): List<RecipientChipItem> {
-        val type = Types.newParameterizedType(List::class.java, RecipientChipItem::class.java)
+    @FlowPreview
+    private fun initializeContentStream() {
+        launch {
+            contentChannel.consumeAsFlow()
+                .debounce(250)
+                .catch { Timber.e(it) }
+                .collect {
+                    saveDraftMessage()
+                    Timber.i("Draft message was saved!")
+                }
+        }
+    }
+
+    @FlowPreview
+    private fun initializeSubjectStream() {
+        launch {
+            subjectChannel.consumeAsFlow()
+                .debounce(250)
+                .catch { Timber.e(it) }
+                .collect {
+                    saveDraftMessage()
+                    Timber.i("Draft message was saved!")
+                }
+        }
+    }
+
+    private fun serializeDraftMessage(data: MessageDraft): String {
         val moshi = Moshi.Builder().build()
-        val adapter = moshi.adapter<List<RecipientChipItem>>(type)
+        val adapter = moshi.adapter(MessageDraft::class.java)
+        return adapter.toJson(data)
+    }
+
+    private fun deserializeDraftMessage(json: String): MessageDraft {
+        val moshi = Moshi.Builder().build()
+        val adapter = moshi.adapter(MessageDraft::class.java)
         return adapter.fromJson(json)!!
     }
 
-    private fun checkState() {
+    private fun changeDraftState() {
         messageRepository.changeDraftState(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formSubjectValue!!)
     }
 
-    fun saveRecipientsToPreference(recipients: List<RecipientChipItem>) {
-        checkState()
-        val json = serializeRecipients(recipients)
-        messageRepository.setMessageRecipients(json)
-    }
-
-    private fun getRecipientsFromPreference(): List<RecipientChipItem> {
-        val json = messageRepository.getMessageRecipients()
-        return deserializeRecipients(json)
-    }
-
-    fun saveSubjectToPreference(subject: String) {
-        checkState()
-        messageRepository.setMessageSubject(subject)
-    }
-
-    fun saveContentToPreference(content: String) {
-        checkState()
-        messageRepository.setMessageContent(content)
+    fun saveDraftMessage() {
+        changeDraftState()
+        messageRepository.setDraftMessage(serializeDraftMessage(MessageDraft(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formContentValue!!)))
     }
 
     fun restoreMessageParts() {
-        view?.setSubject(messageRepository.getMessageSubject())
-        view?.setContent(messageRepository.getMessageContent())
-        view?.setSelectedRecipients(getRecipientsFromPreference())
+        val draftMessage = deserializeDraftMessage(messageRepository.getDraftMessage())
+        view?.setSelectedRecipients(draftMessage.recipients)
+        view?.setSubject(draftMessage.subject)
+        view?.setContent(draftMessage.content)
     }
 
     fun getRecipientsNames(): String {
-        return getRecipientsFromPreference().joinToString { it.recipient.name }
+        return deserializeDraftMessage(messageRepository.getDraftMessage()).recipients.joinToString { it.recipient.name }
     }
 
     fun clearDraft() {

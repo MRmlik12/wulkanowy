@@ -124,27 +124,13 @@ class MessageRepository @Inject constructor(
         sharedPrefProvider.putBoolean(context.getString(R.string.pref_key_message_send_is_draft), true)
     }
 
-    fun setMessageSubject(text: CharSequence?) {
-        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_subject), text.toString())
+    fun setDraftMessage(messageDraft: String) {
+        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_draft), messageDraft)
     }
 
-    fun getMessageSubject() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_subject), "")
-
-    fun setMessageContent(text: CharSequence?) {
-        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_content), text.toString())
-    }
-
-    fun getMessageContent() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_content), "")
-
-    fun setMessageRecipients(recipients: String) {
-        sharedPrefProvider.putString(context.getString(R.string.pref_key_message_send_recipients), recipients)
-    }
-
-    fun getMessageRecipients() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_recipients), "")
+    fun getDraftMessage() = sharedPrefProvider.getString(context.getString(R.string.pref_key_message_send_draft), "")
 
     fun clearMessagePreferences() {
-        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_recipients))
-        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_subject))
-        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_content))
+        sharedPrefProvider.delete(context.getString(R.string.pref_key_message_send_draft))
     }
 }

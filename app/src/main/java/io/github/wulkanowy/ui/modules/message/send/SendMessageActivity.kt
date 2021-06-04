@@ -18,7 +18,6 @@ import io.github.wulkanowy.R
 import io.github.wulkanowy.data.db.entities.Message
 import io.github.wulkanowy.data.db.entities.ReportingUnit
 import io.github.wulkanowy.databinding.ActivitySendMessageBinding
-import io.github.wulkanowy.materialchipsinput.ChipItem
 import io.github.wulkanowy.ui.base.BaseActivity
 import io.github.wulkanowy.utils.dpToPx
 import io.github.wulkanowy.utils.hideSoftInput
@@ -94,17 +93,16 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
 
     private fun onMessageSubjectChange(text: CharSequence?) {
         formSubjectValue = text.toString()
-        presenter
-        presenter.saveSubjectToPreference(text.toString())
+        presenter.saveDraftMessage()
     }
 
     private fun onMessageContentChange(text: CharSequence?) {
         formContentValue = text.toString()
-        presenter.saveContentToPreference(text.toString())
+        presenter.saveDraftMessage()
     }
 
     private fun onRecipientChange() {
-        presenter.saveRecipientsToPreference(formRecipientsData)
+        presenter.saveDraftMessage()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
