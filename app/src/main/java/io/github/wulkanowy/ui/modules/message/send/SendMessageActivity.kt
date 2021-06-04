@@ -93,16 +93,16 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
 
     private fun onMessageSubjectChange(text: CharSequence?) {
         formSubjectValue = text.toString()
-        presenter.saveDraftMessage()
+        presenter.onSendMessageChange()
     }
 
     private fun onMessageContentChange(text: CharSequence?) {
         formContentValue = text.toString()
-        presenter.saveDraftMessage()
+        presenter.onSendMessageChange()
     }
 
     private fun onRecipientChange() {
-        presenter.saveDraftMessage()
+        presenter.onSendMessageChange()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

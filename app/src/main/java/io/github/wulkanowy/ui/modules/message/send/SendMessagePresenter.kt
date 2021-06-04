@@ -39,21 +39,17 @@ class SendMessagePresenter @Inject constructor(
     private val analytics: AnalyticsHelper
 ) : BasePresenter<SendMessageView>(errorHandler, studentRepository) {
 
-    private val recipientsChannel= Channel<String>()
-    private val contentChannel = Channel<String>()
-    private val subjectChannel = Channel<String>()
+    private val messageUpdateChannel = Channel<Unit>()
 
     @FlowPreview
     fun onAttachView(view: SendMessageView, message: Message?, reply: Boolean?) {
         super.onAttachView(view)
         view.initView()
-        initializeRecipientsStream()
-        initializeContentStream()
         initializeSubjectStream()
         Timber.i("Send message view was initialized")
         loadData(message, reply)
         with(view) {
-            if (messageRepository.getDraftState() && reply == null) {
+            if (messageRepository.draftMessage != null && reply == null) {
                 view.showMessageBackupDialog()
             }
             message?.let {
@@ -225,36 +221,16 @@ class SendMessagePresenter @Inject constructor(
         }
     }
 
-    @FlowPreview
-    private fun initializeRecipientsStream() {
+    fun onSendMessageChange() {
         launch {
-            recipientsChannel.consumeAsFlow()
-                .debounce(250)
-                .catch { Timber.e(it) }
-                .collect {
-                    saveDraftMessage()
-                    Timber.i("Draft message was saved!")
-                }
-        }
-    }
-
-    @FlowPreview
-    private fun initializeContentStream() {
-        launch {
-            contentChannel.consumeAsFlow()
-                .debounce(250)
-                .catch { Timber.e(it) }
-                .collect {
-                    saveDraftMessage()
-                    Timber.i("Draft message was saved!")
-                }
+            messageUpdateChannel.send(Unit)
         }
     }
 
     @FlowPreview
     private fun initializeSubjectStream() {
         launch {
-            subjectChannel.consumeAsFlow()
+            messageUpdateChannel.consumeAsFlow()
                 .debounce(250)
                 .catch { Timber.e(it) }
                 .collect {
@@ -264,39 +240,22 @@ class SendMessagePresenter @Inject constructor(
         }
     }
 
-    private fun serializeDraftMessage(data: MessageDraft): String {
-        val moshi = Moshi.Builder().build()
-        val adapter = moshi.adapter(MessageDraft::class.java)
-        return adapter.toJson(data)
-    }
-
-    private fun deserializeDraftMessage(json: String): MessageDraft {
-        val moshi = Moshi.Builder().build()
-        val adapter = moshi.adapter(MessageDraft::class.java)
-        return adapter.fromJson(json)!!
-    }
-
-    private fun changeDraftState() {
-        messageRepository.changeDraftState(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formSubjectValue!!)
-    }
-
-    fun saveDraftMessage() {
-        changeDraftState()
-        messageRepository.setDraftMessage(serializeDraftMessage(MessageDraft(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formContentValue!!)))
+    private fun saveDraftMessage() {
+        messageRepository.draftMessage = MessageDraft(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formContentValue!!)
     }
 
     fun restoreMessageParts() {
-        val draftMessage = deserializeDraftMessage(messageRepository.getDraftMessage())
+        val draftMessage = messageRepository.draftMessage ?: return
         view?.setSelectedRecipients(draftMessage.recipients)
         view?.setSubject(draftMessage.subject)
         view?.setContent(draftMessage.content)
     }
 
     fun getRecipientsNames(): String {
-        return deserializeDraftMessage(messageRepository.getDraftMessage()).recipients.joinToString { it.recipient.name }
+        return messageRepository.draftMessage?.recipients.orEmpty().joinToString { it.recipient.name }
     }
 
     fun clearDraft() {
-        messageRepository.clearMessagePreferences()
+        messageRepository.draftMessage = null
     }
 }
