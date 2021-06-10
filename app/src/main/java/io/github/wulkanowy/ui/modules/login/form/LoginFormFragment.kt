@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.View.GONE
-import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import androidx.core.widget.doOnTextChanged
 import dagger.hilt.android.AndroidEntryPoint
@@ -198,7 +197,7 @@ class LoginFormFragment : BaseFragment<FragmentLoginFormBinding>(R.layout.fragme
 
     override fun showContact(show: Boolean) {
         binding.loginFormContact.visibility = if (show) VISIBLE else GONE
-        binding.loginFormRecoverLink.visibility = if (show) INVISIBLE else VISIBLE
+        binding.loginFormRecoverLink.visibility = if (show) GONE else VISIBLE
     }
 
     override fun openAdvancedLogin() {
