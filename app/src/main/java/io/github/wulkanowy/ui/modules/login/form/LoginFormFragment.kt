@@ -198,7 +198,7 @@ class LoginFormFragment : BaseFragment<FragmentLoginFormBinding>(R.layout.fragme
 
     override fun showContact(show: Boolean) {
         binding.loginFormContact.visibility = if (show) VISIBLE else GONE
-        binding.loginFormRecoverLink.visibility = if (show) INVISIBLE else GONE
+        binding.loginFormRecoverLink.visibility = if (show) INVISIBLE else VISIBLE
     }
 
     override fun openAdvancedLogin() {
