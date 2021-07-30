@@ -19,7 +19,6 @@ import javax.inject.Singleton
 @OptIn(ExperimentalCoroutinesApi::class)
 @Singleton
 class PreferencesRepository @Inject constructor(
-    @ApplicationContext val context: Context,
     private val sharedPref: SharedPreferences,
     private val flowSharedPref: FlowSharedPreferences,
     @ApplicationContext val context: Context
