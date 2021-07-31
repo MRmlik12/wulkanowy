@@ -48,5 +48,9 @@ interface SendMessageView : BaseView {
 
     fun showMessageBackupDialog()
 
+    fun getMessageBackupDialogString(): String
+
+    fun getMessageBackupDialogStringWithRecipients(recipients: String): String
+
     fun clearDraft()
 }

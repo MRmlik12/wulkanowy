@@ -1,6 +1,6 @@
 package io.github.wulkanowy.ui.modules.message.send
 
-import com.squareup.moshi.Moshi
+import io.github.wulkanowy.R
 import io.github.wulkanowy.data.Status
 import io.github.wulkanowy.data.db.entities.Message
 import io.github.wulkanowy.data.db.entities.Recipient
@@ -221,13 +221,13 @@ class SendMessagePresenter @Inject constructor(
         }
     }
 
-    fun onSendMessageChange() {
+    fun onMessageContentChange() {
         launch {
             messageUpdateChannel.send(Unit)
         }
     }
 
-    @FlowPreview
+    @OptIn(FlowPreview::class)
     private fun initializeSubjectStream() {
         launch {
             messageUpdateChannel.consumeAsFlow()
@@ -241,7 +241,11 @@ class SendMessagePresenter @Inject constructor(
     }
 
     private fun saveDraftMessage() {
-        messageRepository.draftMessage = MessageDraft(view?.formRecipientsData!!, view?.formSubjectValue!!, view?.formContentValue!!)
+        messageRepository.draftMessage = MessageDraft(
+            view?.formRecipientsData!!,
+            view?.formSubjectValue!!,
+            view?.formContentValue!!
+        )
     }
 
     fun restoreMessageParts() {
@@ -249,6 +253,7 @@ class SendMessagePresenter @Inject constructor(
         view?.setSelectedRecipients(draftMessage.recipients)
         view?.setSubject(draftMessage.subject)
         view?.setContent(draftMessage.content)
+        Timber.i("Continue work on draft")
     }
 
     fun getRecipientsNames(): String {
@@ -257,5 +262,9 @@ class SendMessagePresenter @Inject constructor(
 
     fun clearDraft() {
         messageRepository.draftMessage = null
+        Timber.i("Draft cleared!")
     }
+
+    fun getMessageBackupContent(recipients: String) = if (recipients.isEmpty()) view?.getMessageBackupDialogString()
+        else view?.getMessageBackupDialogStringWithRecipients(recipients)
 }

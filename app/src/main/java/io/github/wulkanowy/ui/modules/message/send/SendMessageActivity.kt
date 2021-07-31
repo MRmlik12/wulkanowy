@@ -1,6 +1,7 @@
 package io.github.wulkanowy.ui.modules.message.send
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
@@ -22,11 +23,13 @@ import io.github.wulkanowy.ui.base.BaseActivity
 import io.github.wulkanowy.utils.dpToPx
 import io.github.wulkanowy.utils.hideSoftInput
 import io.github.wulkanowy.utils.showSoftInput
+import kotlinx.coroutines.FlowPreview
+import timber.log.Timber
 import javax.inject.Inject
 
-@Suppress("UNCHECKED_CAST")
 @AndroidEntryPoint
-class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessageBinding>(), SendMessageView {
+class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessageBinding>(),
+    SendMessageView {
 
     @Inject
     override lateinit var presenter: SendMessagePresenter
@@ -64,7 +67,8 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
     override val messageSuccess: String
         get() = getString(R.string.message_send_successful)
 
-    @SuppressLint("CommitPrefEdits")
+    @FlowPreview
+    @Suppress("UNCHECKED_CAST")
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(ActivitySendMessageBinding.inflate(layoutInflater).apply { binding = this }.root)
@@ -76,7 +80,11 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
         formSubjectValue = binding.sendMessageSubject.text.toString()
         formContentValue = binding.sendMessageMessageContent.text.toString()
 
-        presenter.onAttachView(this, intent.getSerializableExtra(EXTRA_MESSAGE) as? Message, intent.getSerializableExtra(EXTRA_REPLY) as? Boolean)
+        presenter.onAttachView(
+            view = this,
+            message = intent.getSerializableExtra(EXTRA_MESSAGE) as? Message,
+            reply = intent.getSerializableExtra(EXTRA_REPLY) as? Boolean
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -93,16 +101,16 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
 
     private fun onMessageSubjectChange(text: CharSequence?) {
         formSubjectValue = text.toString()
-        presenter.onSendMessageChange()
+        presenter.onMessageContentChange()
     }
 
     private fun onMessageContentChange(text: CharSequence?) {
         formContentValue = text.toString()
-        presenter.onSendMessageChange()
+        presenter.onMessageContentChange()
     }
 
     private fun onRecipientChange() {
-        presenter.onSendMessageChange()
+        presenter.onMessageContentChange()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -192,7 +200,8 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
             contentHitRect.top = contentHitRect.bottom
             contentHitRect.bottom = containerHitRect.bottom
 
-            binding.sendMessageContent.touchDelegate = TouchDelegate(contentHitRect, binding.sendMessageMessageContent)
+            binding.sendMessageContent.touchDelegate =
+                TouchDelegate(contentHitRect, binding.sendMessageMessageContent)
         }
 
         with(binding.sendMessageMessageContent) {
@@ -204,11 +213,22 @@ class SendMessageActivity : BaseActivity<SendMessagePresenter, ActivitySendMessa
     }
 
     override fun showMessageBackupDialog() {
-        SendMessageDialog().show(supportFragmentManager, "backupMessage")
+        AlertDialog.Builder(this)
+            .setTitle(R.string.message_title)
+            .setMessage(presenter.getMessageBackupContent(presenter.getRecipientsNames()))
+            .setPositiveButton(R.string.all_yes) { _, _ -> presenter.restoreMessageParts() }
+            .setNegativeButton(R.string.all_no) { _, _ -> presenter.clearDraft() }
+            .show()
     }
 
     override fun clearDraft() {
         formRecipientsData = binding.sendMessageTo.addedChipItems as List<RecipientChipItem>
         presenter.clearDraft()
     }
+
+    override fun getMessageBackupDialogString() =
+        resources.getString(R.string.message_restore_dialog)
+
+    override fun getMessageBackupDialogStringWithRecipients(recipients: String) =
+        resources.getString(R.string.message_restore_dialog_with_recipients, recipients)
 }
